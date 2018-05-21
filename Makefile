@@ -1,11 +1,14 @@
+test-lambda:
+	cd lambda && go test --race
+
 build-lambda:
 	cd lambda && GOOS=linux GOARCH=amd64 go build
 
-test-lambda:
-	cd lambda && go test --race
+start-lambda:
+	_LAMBDA_SERVER_PORT=8787 ./lambda/lambda
 
 build-proxy:
 	cd proxy && go build
 
-test-proxy:
-	cd proxy && go test --race
+start-proxy:
+	./proxy/proxy
