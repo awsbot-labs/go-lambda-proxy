@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"net/rpc"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda/messages"
 )
 
@@ -51,9 +53,18 @@ func createLambdaRequest(r *http.Request) (*messages.InvokeRequest, error) {
 		return nil, fmt.Errorf("could not read the payload: %v", err)
 	}
 
+	pbs, err := json.Marshal(events.APIGatewayProxyRequest{
+		HTTPMethod:      r.Method,
+		Body:            string(p),
+		IsBase64Encoded: false,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not marshall the payload: %v", err)
+	}
+
 	t := time.Now()
 	return &messages.InvokeRequest{
-		Payload:      p,
+		Payload:      pbs,
 		RequestId:    "0",
 		XAmznTraceId: "",
 		Deadline: messages.InvokeRequest_Timestamp{
